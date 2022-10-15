@@ -1,21 +1,36 @@
 package org.example;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Main {
 
+  private static List<String> list;
+
   public static void main(String[] args) {
-    System.out.println("Start");
-    Thread thread  = new Thread(new Runnable() {
+    Thread thread1 = new Thread(new Runnable() {
       @Override
       public void run() {
-        for (int i = 0; i < 1000; i++) {
-          System.out.print(i);
+        list = new ArrayList<>();
+      }
+    });
+    Thread thread2 = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        long before = System.currentTimeMillis();
+        try {
+          thread1.join();
+          System.out.println(list.size());
+          long after = System.currentTimeMillis();
+          System.out.println(after - before);
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
         }
       }
     });
-    thread.start();
-    for (int i = 0; i < 1000; i++) {
-      System.out.print("Main");
-    }
-    System.out.println("\nFinish");
+
+    thread1.start();
+    thread2.start();
+
   }
 }
