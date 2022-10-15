@@ -8,8 +8,28 @@ public class HW_part2 {
   private static final int HALF_SIZE = SIZE / 2;
 
   public static void main(String[] args) {
+    startTimer();
     withoutConcurrency();
     withConcurrency();
+  }
+
+  private static void startTimer() {
+    Thread timer = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        int seconds = 0;
+        try {
+          while (true) {
+            System.out.println(seconds++);
+            Thread.sleep(1000);
+          }
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
+    timer.setDaemon(true);
+    timer.start();
   }
 
   private static void withConcurrency() {

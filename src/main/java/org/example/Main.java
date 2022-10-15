@@ -5,32 +5,35 @@ import java.util.List;
 
 public class Main {
 
-  private static List<String> list;
-
   public static void main(String[] args) {
-    Thread thread1 = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        list = new ArrayList<>();
-      }
-    });
-    Thread thread2 = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        long before = System.currentTimeMillis();
-        try {
-          thread1.join();
-          System.out.println(list.size());
-          long after = System.currentTimeMillis();
-          System.out.println(after - before);
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
+    Counter counter = new Counter();
+    try {
+      Thread thread1 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          for (int i = 0; i < 1000; i++) {
+            counter.increment();
+          }
         }
-      }
-    });
+      });
 
-    thread1.start();
-    thread2.start();
+      Thread thread2 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          for (int i = 0; i < 1000; i++) {
+            counter.decrement();
+          }
+        }
+      });
 
+      thread1.start();
+      thread2.start();
+      thread1.join();
+      thread2.join();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+
+    System.out.println(counter.getValue());
   }
 }
