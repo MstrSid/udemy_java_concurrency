@@ -2,8 +2,8 @@ package org.example;
 
 public class Counter {
 
-  private Object monitor = new Object();
-  private Object monitor2 = new Object();
+  private final Object monitor = new Object();
+  private final Object monitor2 = new Object();
   private int value;
   private int value2;
 
