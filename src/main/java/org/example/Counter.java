@@ -1,41 +1,20 @@
 package org.example;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Counter {
 
-  private final Object monitor = new Object();
-  private final Object monitor2 = new Object();
-  private int value;
-  private int value2;
+  private final AtomicInteger value = new AtomicInteger();
 
   public int getValue() {
-    return value;
+    return value.intValue();
   }
 
   public void increment() {
-    synchronized (monitor) {
-      value++;
-    }
+    value.getAndIncrement();
   }
 
   public void decrement() {
-    synchronized (monitor) {
-      value--;
-    }
-  }
-
-  public int getValue2() {
-    return value2;
-  }
-
-  public void increment2() {
-    synchronized (monitor2) {
-      value2++;
-    }
-  }
-
-  public void decrement2() {
-    synchronized (monitor2) {
-      value2--;
-    }
+    value.getAndDecrement();
   }
 }
