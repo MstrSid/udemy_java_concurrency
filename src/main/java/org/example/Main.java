@@ -1,36 +1,36 @@
 package org.example;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class Main {
 
   public static void main(String[] args) {
-    Counter counter = new Counter();
-    int barrier = 1000;
+    ExecutorService executorService = Executors.newFixedThreadPool(5);
+    CountDownLatch countDownLatch = new CountDownLatch(10);
+    for (int i = 0; i < 10; i++) {
+      final int index = i;
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          System.out.println("Start " + index);
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+          }
+          System.out.println("Finish " + index);
+          countDownLatch.countDown();
+        }
+      });
+    }
     try {
-      Thread thread1 = new Thread(new Runnable() {
-        @Override
-        public void run() {
-          for (int i = 0; i < barrier; i++) {
-            counter.increment();
-          }
-        }
-      });
-
-      Thread thread2 = new Thread(new Runnable() {
-        @Override
-        public void run() {
-          for (int i = 0; i < barrier; i++) {
-            counter.decrement();
-          }
-        }
-      });
-      thread1.start();
-      thread2.start();
-      thread1.join();
-      thread2.join();
+      countDownLatch.await();
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
-
-    System.out.println(counter.getValue());
+    executorService.shutdown();
+    System.out.println("All thread are terminated");
   }
 }
