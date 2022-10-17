@@ -3,40 +3,18 @@ package org.example;
 public class Main {
 
   public static void main(String[] args) {
-    BlockingQueue blockingQueue = new BlockingQueue();
+    Account account = new Account(1000, 1000);
     new Thread(new Runnable() {
       @Override
       public void run() {
-        int counter = 1;
-        while (true) {
-          System.out.println("Calls: " + counter++);
-          Runnable task = blockingQueue.take();
-          if (task != null) {
-            new Thread(task).start();
-          }
-        }
+        account.transferFrom1to2(300);
       }
     }).start();
-
-    for (int i = 0; i < 10; i++) {
-      final int index = i;
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        account.transferFrom2to1(500);
       }
-      blockingQueue.add(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            Thread.sleep(1000);
-            System.out.println("Task" + index);
-          } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-          }
-        }
-      });
-    }
-
+    }).start();
   }
 }
