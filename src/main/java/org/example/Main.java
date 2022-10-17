@@ -1,61 +1,42 @@
 package org.example;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ThreadFactory;
-
 public class Main {
 
   public static void main(String[] args) {
-    ExecutorService executorService = Executors.newFixedThreadPool(3, new ThreadFactory() {
-      @Override
-      public Thread newThread(Runnable r) {
-        Thread thread = new Thread(r);
-        thread.setDaemon(true);
-        return thread;
-      }
-    });
-    executorService.execute(new Runnable() {
+    BlockingQueue blockingQueue = new BlockingQueue();
+    new Thread(new Runnable() {
       @Override
       public void run() {
-        try {
-          while (true) {
-            System.out.print(".");
-            Thread.sleep(500);
+        int counter = 1;
+        while (true) {
+          System.out.println("Calls: " + counter++);
+          Runnable task = blockingQueue.take();
+          if (task != null) {
+            new Thread(task).start();
           }
-        } catch (InterruptedException e) {
-          e.printStackTrace();
         }
       }
-    });
-    Future<String> futureName = executorService.submit(new Callable<String>() {
-      @Override
-      public String call() throws Exception {
-        Thread.sleep(5000);
-        return "John";
-      }
-    });
+    }).start();
 
-    Future<Integer> futureAge = executorService.submit(new Callable<Integer>() {
-      @Override
-      public Integer call() throws Exception {
-        Thread.sleep(4000);
-        return 35;
+    for (int i = 0; i < 10; i++) {
+      final int index = i;
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
       }
-    });
-
-    try {
-      String name = futureName.get();
-      int age = futureAge.get();
-      System.out.println("\nName: " + name + " Age: " + age);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    } catch (ExecutionException e) {
-      throw new RuntimeException(e);
+      blockingQueue.add(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            Thread.sleep(1000);
+            System.out.println("Task" + index);
+          } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+          }
+        }
+      });
     }
+
   }
 }
